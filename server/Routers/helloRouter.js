@@ -1,5 +1,6 @@
 import { Router, request, response } from 'express';
 import jwt from "jsonwebtoken";
+import cloudinary from "cloudinary"
 
 // definations of action function for the routes
 import * as helloControllers from "../Controllers/helloControllers.js";
@@ -17,12 +18,12 @@ const verifyTokenMiddleWare = (request, response, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  try{
+  try {
     const decodeToken = jwt.verify(token, process.env.secretKey);
     request.user = decodeToken
     next();
 
-  }catch (error) {
+  } catch (error) {
     response.status(401).json({ message: "Unauthorized   - Invalid JWT token" });
   }
 
@@ -61,49 +62,40 @@ router.route("/").get((req, res) => {
 
 })
 
-router.route("/forAution").post(verifyTokenMiddleWare, (req, res) => {
+router.route("/forAution").post(verifyTokenMiddleWare, async (req, res) => {
   const userId = req.user.id
-  const data = req.body
-  //todo:upload image to cloudinary 
+  // const data = req.body
+  const data = {
+    image: './testImg.jpg',
+    description: 'A beautiful landscape painting 2.',
+    estimatePrice: 1000,
+    category: 'Landscape',
+    biddingStartTime: "2024-07-05T20:30:28.793Z",
+    biddingEndTime: "2024-07-07T20:30:28.793Z",
+    bidStatus: 'bidding',
+    fixedPrice: null,
+    highestBid: 0,
+    highestBidder: null,
+    createdAt: new Date('2024-07-03T12:00:00.000Z')
+  };
+  
   data.userId = userId
   console.log(data);
 
+  try {
+    const coludResponse = await cloudinary.uploader.upload(data.image)
 
-  async function uploadImagetoColud(event) {
-    setLoader(true)
+    data.image = coludResponse.url;
 
-    if(image !== null){
-        let data = new FormData();
-        data.append('file', image);
-        data.append('upload_preset', "fs0w72qj");
-        data.append('cloud_name', "don6c7ggw");
+    const art = new Art(data)
 
-        const response = await fetch("https://api.cloudinary.com/v1_1/don6c7ggw/image/upload", {
-            method: "POST",
-            body: data
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to upload image');
-        }
-
-        const imageData = await response.json();
-        imageUrl = imageData.url;
-
-    }else{
-        imageUrl = productObj.picturelink
-    }
-}
-
-
-  const art = new Art(data)
-
-  art.save().then(() => {
+    const dbRepsonse = await art.save();
     res.status(200).send("art post for aution created")
-  })
-    .catch((error) => {
-      res.status(500).send(error);
-    })
+  }
+  catch (error) {
+    console.error('Error creating art post for auction:', error);
+    res.status(500).send(error)
+  };
 
 
 })
@@ -117,34 +109,53 @@ router.route("/forSell").get((request, response) => {
     biddingStartTime: null,
     biddingEndTime: null,
   })
-  .then((arts)=>{
-    console.log(arts);
-    response.status(200).send(arts)
-  })
-  .catch((error) => {
-    res.status(500).send(error);
-  })
+    .then((arts) => {
+      console.log(arts);
+      response.status(200).send(arts)
+    })
+    .catch((error) => {
+      res.status(500).send(error);
+    })
 
 })
 
 
-router.route("/forSell").post(verifyTokenMiddleWare, (request, response) => {
-  const userId = request.user.id
-  const data = request.body
-  //todo:upload image to cloudinary 
+router.route('/forSell').post(verifyTokenMiddleWare, async (request, response) => {
+  const userId = request.user.id;
+  // const data = req.body
+  const data = {
+    image: './testImg.jpg',
+    description: 'A beautiful landscape painting.',
+    estimatePrice: 5000,
+    category: 'Landscape',
+    biddingStartTime: null,
+    biddingEndTime: null,
+    bidStatus: 'selling',
+    fixedPrice: 10,
+    highestBid: 0,
+    highestBidder: null,
+    createdAt: new Date('2024-07-03T12:00:00.000Z')
+  };
   data.userId = userId
   console.log(data);
 
-  const art = new Art(data)
+  try {
+    const coludResponse = await cloudinary.uploader.upload(data.image)
 
-  art.save().then(() => {
+    data.image = coludResponse.url;
+
+    const art = new Art(data);
+
+    const dbRepsonse = await art.save();
     response.status(200).send("art post for selling created")
-  })
-    .catch((error) => {
-      response.status(500).send(error);
-    })
+  }
+  catch (error) {
+    console.error('Error creating art for selling:', error);
+    response.status(500).json({ message: 'Failed to create art for selling', error: error.message });
+  };
 
 
-})
+});
+
 
 export default router;
