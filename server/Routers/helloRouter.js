@@ -32,20 +32,32 @@ const verifyTokenMiddleWare = (request, response, next) => {
 
 
 
-router.route("/").get((req, res) => {
+router.route("/forAuction").get((req, res) => {
   let currentDate = new Date()
 
   Art.find({
+    bidStatus: "bidding",
     biddingStartTime: { $lte: currentDate },
-    biddingEndTime: { $gte: currentDate }
+    biddingEndTime: { $gte: currentDate },
   })
     .then((arts) => {
 
       const result = arts.map(ele => {
 
-        let duration = ele.biddingEndTime.getTime() - currentDate.getTime()
-        // console.log(duration);
+        let milliSec = ele.biddingEndTime.getTime() - currentDate.getTime()
         // Todo: change the duration in H/M/S fomrat
+        let sec  = Math.floor(milliSec/1000)
+        const hours = Math.floor(sec/3600)
+        sec %= 3600
+        const minutes = Math.floor(sec/60)
+        sec %= 60
+
+        const duration = {
+          "hours": hours,
+          "minutes": minutes,
+          "seconds": sec
+        }
+
         return {
           "duration": duration,
           data: ele
@@ -59,44 +71,6 @@ router.route("/").get((req, res) => {
     .catch((error) => {
       res.status(500).send(error);
     })
-
-})
-
-router.route("/forAution").post(verifyTokenMiddleWare, async (req, res) => {
-  const userId = req.user.id
-  // const data = req.body
-  const data = {
-    image: './testImg.jpg',
-    description: 'A beautiful landscape painting 2.',
-    estimatePrice: 1000,
-    category: 'Landscape',
-    biddingStartTime: "2024-07-05T20:30:28.793Z",
-    biddingEndTime: "2024-07-07T20:30:28.793Z",
-    bidStatus: 'bidding',
-    fixedPrice: null,
-    highestBid: 0,
-    highestBidder: null,
-    createdAt: new Date('2024-07-03T12:00:00.000Z')
-  };
-  
-  data.userId = userId
-  console.log(data);
-
-  try {
-    const coludResponse = await cloudinary.uploader.upload(data.image)
-
-    data.image = coludResponse.url;
-
-    const art = new Art(data)
-
-    const dbRepsonse = await art.save();
-    res.status(200).send("art post for aution created")
-  }
-  catch (error) {
-    console.error('Error creating art post for auction:', error);
-    res.status(500).send(error)
-  };
-
 
 })
 
@@ -120,20 +94,18 @@ router.route("/forSell").get((request, response) => {
 })
 
 
-router.route('/forSell').post(verifyTokenMiddleWare, async (request, response) => {
+
+router.route('/createPost').post(verifyTokenMiddleWare, async (request, response) => {
   const userId = request.user.id;
   // const data = req.body
   const data = {
     image: './testImg.jpg',
     description: 'A beautiful landscape painting.',
-    estimatePrice: 5000,
     category: 'Landscape',
     biddingStartTime: null,
     biddingEndTime: null,
     bidStatus: 'selling',
-    fixedPrice: 10,
-    highestBid: 0,
-    highestBidder: null,
+    fixedPrice: 500,
     createdAt: new Date('2024-07-03T12:00:00.000Z')
   };
   data.userId = userId
@@ -147,11 +119,11 @@ router.route('/forSell').post(verifyTokenMiddleWare, async (request, response) =
     const art = new Art(data);
 
     const dbRepsonse = await art.save();
-    response.status(200).send("art post for selling created")
+    response.status(200).send("art post created")
   }
   catch (error) {
-    console.error('Error creating art for selling:', error);
-    response.status(500).json({ message: 'Failed to create art for selling', error: error.message });
+    console.error('Error creating art post:', error);
+    response.status(500).json({ message: 'Failed to create art post', error: error.message });
   };
 
 

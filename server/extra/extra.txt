@@ -27,3 +27,46 @@ export function helloUser(req, res) {
   res.send(`<h1>hello from flask to ${id}</h1>`)
 
 }
+
+
+
+
+
+
+router.route('/forSell').post(verifyTokenMiddleWare, async (request, response) => {
+  const userId = request.user.id;
+  // const data = req.body
+  const data = {
+    image: './testImg.jpg',
+    description: 'A beautiful landscape painting.',
+    estimatePrice: 5000,
+    category: 'Landscape',
+    biddingStartTime: null,
+    biddingEndTime: null,
+    bidStatus: 'selling',
+    fixedPrice: 10,
+    highestBid: 0,
+    highestBidder: null,
+    createdAt: new Date('2024-07-03T12:00:00.000Z')
+  };
+  data.userId = userId
+  console.log(data);
+
+  try {
+    const coludResponse = await cloudinary.uploader.upload(data.image)
+
+    data.image = coludResponse.url;
+
+    const art = new Art(data);
+
+    const dbRepsonse = await art.save();
+    response.status(200).send("art post for selling created")
+  }
+  catch (error) {
+    console.error('Error creating art for selling:', error);
+    response.status(500).json({ message: 'Failed to create art for selling', error: error.message });
+  };
+
+
+});
+
