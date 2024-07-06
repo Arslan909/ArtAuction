@@ -94,6 +94,47 @@ router.route("/forSell").get((request, response) => {
 })
 
 
+router.route("/postDetails/:id").get((request, response) => {
+  const postId = request.params.id
+  Art.findOne({
+    _id: postId
+  })
+    .then((art) => {
+      let currentDate = new Date()
+      let duration = {}
+
+      if(art.bidStatus == "bidding"){
+        let milliSec = art.biddingEndTime.getTime() - currentDate.getTime()
+        let sec  = Math.floor(milliSec/1000)
+
+        const hours = Math.floor(sec/3600)
+        sec %= 3600
+        const minutes = Math.floor(sec/60)
+        sec %= 60
+
+        duration = {
+          "hours": hours,
+          "minutes": minutes,
+          "seconds": sec
+        }
+
+      }else{
+        duration = null
+      }
+
+      console.log({duration:duration, data:art});
+      response.status(200).json({duration:duration, data:art})
+    })
+    .catch((error) => {
+      console.log(error);
+      response.status(500).send(error);
+    })
+
+})
+
+
+
+
 
 router.route('/createPost').post(verifyTokenMiddleWare, async (request, response) => {
   const userId = request.user.id;
