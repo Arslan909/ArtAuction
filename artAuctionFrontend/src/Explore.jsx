@@ -1,31 +1,66 @@
 import React from 'react';
 
-const ArtCard = ({ title, description, imageSrc, hours, minutes, seconds }) => (
-  <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-    <div className="relative overflow-hidden rounded-lg">
-      <img
-        src={imageSrc}
-        alt="Art piece"
-        className="w-full h-48 object-cover"
-        style={{ aspectRatio: '500 / 500', objectFit: 'cover' }}
-      />
-    </div>
-    <div className="mt-4">
-      <h3 className="text-lg font-bold">{title}</h3>
-      <p className="text-gray-500 text-sm">{description}</p>
-      <div className="flex flex-col items-start mt-4">
-        <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
-          Bid on this art
-        </button>
-        <div className="flex items-center justify-center bg-black text-white text-sm font-bold px-4 py-1 mt-2 w-full">
-          <span>{hours}h-</span>
-          <span> {minutes}m-</span>
-          <span>{seconds}s</span>
+const ArtCard = ({ title, description, imageSrc, totalSeconds}) => {
+
+  const [duration, setDuration] = React.useState({})
+
+  React.useEffect(()=>{
+    
+    function counter() {
+      if(totalSeconds < 0){
+        clearInterval(intervalId)
+      }
+      let sec = totalSeconds
+      let hours = Math.floor(sec/3600)
+      sec %= 3600
+      let minutes = Math.floor(sec/60)
+      sec %= 60
+  
+      setDuration({
+        "hours":hours,
+        "minutes":minutes,
+        "seconds":sec
+      })
+      
+      totalSeconds --
+  
+    }
+  
+    const intervalId = setInterval(counter, 1000)
+
+    return () => {
+      clearInterval(intervalId);
+    };
+
+  },[])
+  
+  return (
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+      <div className="relative overflow-hidden rounded-lg">
+        <img
+          src={imageSrc}
+          alt="Art piece"
+          className="w-full h-48 object-cover"
+          style={{ aspectRatio: '500 / 500', objectFit: 'cover' }}
+        />
+      </div>
+      <div className="mt-4">
+        <h3 className="text-lg font-bold">{title}</h3>
+        <p className="text-gray-500 text-sm">{description}</p>
+        <div className="flex flex-col items-start mt-4">
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+            Bid on this art
+          </button>
+          <div className="flex items-center justify-center bg-black text-white text-sm font-bold px-4 py-1 mt-2 w-full">
+            <span>{duration.hours}h-</span>
+            <span> {duration.minutes}m-</span>
+            <span>{duration.seconds}s</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  )
+}
 
 const Explore = () => {
   const [artPosts, setArtPosts] = React.useState([])
@@ -45,33 +80,34 @@ const Explore = () => {
       .catch((error) => {
         console.log(error);
       })
-  },[])
-  const artPieces = [
-    {
-      title: 'Abstract Painting',
-      description: 'Vibrant colors and bold strokes.',
-      imageSrc: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0F3RSOtT0KlhgTtK07uYx9TcYY1XiscSOQ&s',
-      time: '0h',
-    },
-    {
-      title: 'Landscape Painting',
-      description: 'Serene and calming nature scene.',
-      imageSrc: 'https://media.cnn.com/api/v1/images/stellar/prod/190430171751-mona-lisa.jpg?q=w_2000,c_fill',
-      time: '1h',
-    },
-    {
-      title: 'Portrait Painting',
-      description: 'Captivating and lifelike portrait.',
-      imageSrc: 'https://media.cnn.com/api/v1/images/stellar/prod/190430171751-mona-lisa.jpg?q=w_2000,c_fill',
-      time: '2h',
-    },
-    {
-      title: 'Still Life Painting',
-      description: 'Detailed and visually striking.',
-      imageSrc: 'https://media.cnn.com/api/v1/images/stellar/prod/190430171751-mona-lisa.jpg?q=w_2000,c_fill',
-      time: '1h',
-    },
-  ];
+  }, [])
+
+  // const artPieces = [
+  //   {
+  //     title: 'Abstract Painting',
+  //     description: 'Vibrant colors and bold strokes.',
+  //     imageSrc: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0F3RSOtT0KlhgTtK07uYx9TcYY1XiscSOQ&s',
+  //     time: '0h',
+  //   },
+  //   {
+  //     title: 'Landscape Painting',
+  //     description: 'Serene and calming nature scene.',
+  //     imageSrc: 'https://media.cnn.com/api/v1/images/stellar/prod/190430171751-mona-lisa.jpg?q=w_2000,c_fill',
+  //     time: '1h',
+  //   },
+  //   {
+  //     title: 'Portrait Painting',
+  //     description: 'Captivating and lifelike portrait.',
+  //     imageSrc: 'https://media.cnn.com/api/v1/images/stellar/prod/190430171751-mona-lisa.jpg?q=w_2000,c_fill',
+  //     time: '2h',
+  //   },
+  //   {
+  //     title: 'Still Life Painting',
+  //     description: 'Detailed and visually striking.',
+  //     imageSrc: 'https://media.cnn.com/api/v1/images/stellar/prod/190430171751-mona-lisa.jpg?q=w_2000,c_fill',
+  //     time: '1h',
+  //   },
+  // ];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -116,20 +152,21 @@ const Explore = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-lg shadow-md p-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold">Explore Art</h1>
+              <h1 className="text-2xl font-bold">Live Auctions</h1>
               <p className="text-gray-500 mt-2">Bid on arts of your choice or something.</p>
             </div>
-            <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 pb-4">
-              <div className="inline-flex items-start space-x-8 p-5">
+            <div className="overflow-x-auto mx-4 sm:-mx-6 lg:-mx-8 pb-4">
+              <div className="overflow-x-auto inline-flex items-start space-x-8 p-5">
                 {artPosts.map((art, index) => (
                   <ArtCard
                     key={index}
                     title={art.data.category}
                     description={art.data.description}
                     imageSrc={art.data.image}
-                    hours={art.duration.hours}
-                    minutes={art.duration.minutes}
-                    seconds={art.duration.seconds}
+                    // hours={art.duration.hours}
+                    // minutes={art.duration.minutes}
+                    // seconds={art.duration.seconds}
+                    totalSeconds = {art.duration.totalSeconds}
                   />
                 ))}
               </div>

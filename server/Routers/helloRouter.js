@@ -46,16 +46,15 @@ router.route("/forAuction").get((req, res) => {
 
         let milliSec = ele.biddingEndTime.getTime() - currentDate.getTime()
         // Todo: change the duration in H/M/S fomrat
-        let sec  = Math.floor(milliSec/1000)
-        const hours = Math.floor(sec/3600)
-        sec %= 3600
-        const minutes = Math.floor(sec/60)
-        sec %= 60
+        // let sec  = Math.floor(milliSec/1000)
+        // const hours = Math.floor(sec/3600)
+        // sec %= 3600
+        // const minutes = Math.floor(sec/60)
+        // sec %= 60
+        const totalSeconds = Math.floor(milliSec / 1000)
 
         const duration = {
-          "hours": hours,
-          "minutes": minutes,
-          "seconds": sec
+          "totalSeconds": totalSeconds
         }
 
         return {
@@ -101,29 +100,35 @@ router.route("/postDetails/:id").get((request, response) => {
   })
     .then((art) => {
       let currentDate = new Date()
+      // console.log(currentDate);
       let duration = {}
 
-      if(art.bidStatus == "bidding"){
+      if (art.bidStatus == "bidding") {
         let milliSec = art.biddingEndTime.getTime() - currentDate.getTime()
-        let sec  = Math.floor(milliSec/1000)
+        // let sec = Math.floor(milliSec / 1000)
 
-        const hours = Math.floor(sec/3600)
-        sec %= 3600
-        const minutes = Math.floor(sec/60)
-        sec %= 60
+        // const hours = Math.floor(sec / 3600)
+        // sec %= 3600
+        // const minutes = Math.floor(sec / 60)
+        // sec %= 60
+
+        // duration = {
+        //   "hours": hours,
+        //   "minutes": minutes,
+        //   "seconds": sec
+        // }
+        const totalSeconds = Math.floor(milliSec / 1000)
 
         duration = {
-          "hours": hours,
-          "minutes": minutes,
-          "seconds": sec
+          "totalSeconds": totalSeconds
         }
 
-      }else{
+      } else {
         duration = null
       }
 
-      console.log({duration:duration, data:art});
-      response.status(200).json({duration:duration, data:art})
+      console.log({ duration: duration, data: art });
+      response.status(200).json({ duration: duration, data: art })
     })
     .catch((error) => {
       console.log(error);
@@ -143,9 +148,9 @@ router.route('/createPost').post(verifyTokenMiddleWare, async (request, response
     image: './testImg.jpg',
     description: 'A beautiful landscape painting.',
     category: 'Landscape',
-    biddingStartTime: null,
-    biddingEndTime: null,
-    bidStatus: 'selling',
+    biddingStartTime: new Date('2024-07-07T01:00:00.000Z'),
+    biddingEndTime: new Date('2024-07-07T22:50:00.038Z'),
+    bidStatus: 'bidding',
     fixedPrice: 500,
     createdAt: new Date('2024-07-03T12:00:00.000Z')
   };
