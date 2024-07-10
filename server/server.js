@@ -18,7 +18,7 @@ mongoose.connect(process.env.CONN_STR)
     });
 
   }).catch((error) => {
-    console.log('Some error has occured');
+    console.log('Some error has occured or internet might be down?:(');
   });
 
 

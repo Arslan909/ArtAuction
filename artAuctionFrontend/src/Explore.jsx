@@ -7,7 +7,7 @@ const ArtCard = ({ title, description, imageSrc, totalSeconds}) => {
   React.useEffect(()=>{
     
     function counter() {
-      if(totalSeconds < 0){
+      if(totalSeconds <= 0){
         clearInterval(intervalId)
       }
       let sec = totalSeconds
@@ -27,10 +27,6 @@ const ArtCard = ({ title, description, imageSrc, totalSeconds}) => {
     }
   
     const intervalId = setInterval(counter, 1000)
-
-    return () => {
-      clearInterval(intervalId);
-    };
 
   },[])
   
@@ -163,9 +159,6 @@ const Explore = () => {
                     title={art.data.category}
                     description={art.data.description}
                     imageSrc={art.data.image}
-                    // hours={art.duration.hours}
-                    // minutes={art.duration.minutes}
-                    // seconds={art.duration.seconds}
                     totalSeconds = {art.duration.totalSeconds}
                   />
                 ))}

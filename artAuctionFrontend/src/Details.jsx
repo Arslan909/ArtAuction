@@ -27,7 +27,7 @@ function Details() {
   const startCounter = (totalSeconds) => {
     const timer = ()=>{
 
-      if(totalSeconds < 0){
+      if(totalSeconds <= 0){
         clearInterval(timerId)
       }
 

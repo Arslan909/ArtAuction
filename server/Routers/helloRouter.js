@@ -1,6 +1,9 @@
 import { Router, request, response } from 'express';
 import jwt from "jsonwebtoken";
 import cloudinary from "cloudinary"
+import multer from 'multer';
+import path from 'path'
+
 
 // definations of action function for the routes
 import * as helloControllers from "../Controllers/helloControllers.js";
@@ -8,6 +11,7 @@ import * as helloControllers from "../Controllers/helloControllers.js";
 import Art from '../Models/Art.js';
 
 const router = Router();
+
 
 const verifyTokenMiddleWare = (request, response, next) => {
   const authHeader = request.headers.authorization
@@ -30,7 +34,21 @@ const verifyTokenMiddleWare = (request, response, next) => {
 }
 
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '/home/arslan/programming/ArtAuction/server/Routers/uploads'); 
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '_' + uniqueSuffix + ext);
+  }
+});
 
+const upload = multer({ storage: storage });
+
+
+// Routes
 
 router.route("/forAuction").get((req, res) => {
   let currentDate = new Date()
@@ -141,27 +159,25 @@ router.route("/postDetails/:id").get((request, response) => {
 
 
 
-router.route('/createPost').post(verifyTokenMiddleWare, async (request, response) => {
+router.route('/createPost').post(verifyTokenMiddleWare, upload.single('image'), async (request, response) => {
   const userId = request.user.id;
-  // const data = req.body
-  const data = {
-    image: './testImg.jpg',
-    description: 'A beautiful landscape painting.',
-    category: 'Landscape',
-    biddingStartTime: new Date('2024-07-07T01:00:00.000Z'),
-    biddingEndTime: new Date('2024-07-07T22:50:00.038Z'),
-    bidStatus: 'bidding',
-    fixedPrice: 500,
-    createdAt: new Date('2024-07-03T12:00:00.000Z')
-  };
+  const data = request.body
+
+  if (data.bidStatus === 'bidding') {
+    if (!data.biddingStartTime || !data.biddingEndTime) {
+      response.status(404).send('Bidding start and end times are required when status is set to bidding');
+    }
+  }
+
+  const file = request.file
   data.userId = userId
+
   console.log(data);
 
   try {
-    const coludResponse = await cloudinary.uploader.upload(data.image)
+    const coludResponse = await cloudinary.uploader.upload(file.path)
 
     data.image = coludResponse.url;
-
     const art = new Art(data);
 
     const dbRepsonse = await art.save();

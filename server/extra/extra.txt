@@ -70,3 +70,16 @@ router.route('/forSell').post(verifyTokenMiddleWare, async (request, response) =
 
 });
 
+
+sampel data request
+
+// const data = {
+  //   image: './testImg.jpg',
+  //   description: 'A beautiful landscape painting.',
+  //   category: 'Landscape',
+  //   biddingStartTime: new Date('2024-07-07T01:00:00.000Z'),
+  //   biddingEndTime: new Date('2024-07-07T22:50:00.038Z'),
+  //   bidStatus: 'bidding' enum("selling", "billing"),
+  //   fixedPrice: 500,
+  //   createdAt: new Date('2024-07-03T12:00:00.000Z')
+  // };
